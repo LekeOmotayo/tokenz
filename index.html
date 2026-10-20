@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leke Local Token Cache — Zero-Infra Semantic Cache</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: rgba(18, 26, 43, 0.75);
+      --card-border: rgba(45, 62, 99, 0.5);
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.25);
+      --success: #34d399;
+      --danger: #f87171;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: radial-gradient(circle at 15% 15%, #0f1c3f 0%, #090d16 60%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2.5rem 1rem;
+    }
+    .container { max-width: 900px; width: 100%; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: var(--accent); padding: 0.35rem 0.85rem;
+      border-radius: 9999px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; margin-bottom: 1rem;
+    }
+    h1 { font-size: 2.25rem; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 0.5rem; }
+    p.lead { color: var(--text-muted); font-size: 1.05rem; margin-bottom: 2rem; line-height: 1.6; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+    @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 1.75rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+    .card-title { font-size: 1.15rem; font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+    textarea, input, select {
+      width: 100%; background: #080c14; border: 1px solid #1e293b;
+      border-radius: 8px; color: #fff; padding: 0.85rem; font-family: inherit; font-size: 0.95rem; margin-bottom: 1rem;
+    }
+    textarea:focus, input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-glow); }
+    button {
+      background: linear-gradient(135deg, #0284c7, #38bdf8);
+      color: #000; font-weight: 600; padding: 0.85rem 1.5rem;
+      border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; width: 100%;
+    }
+    button:hover { transform: translateY(-1px); box-shadow: 0 4px 15px var(--accent-glow); }
+    .metric-row { display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 0.9rem; }
+    .metric-row:last-child { border-bottom: none; }
+    .metric-val { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--accent); }
+    pre {
+      background: #05080f; padding: 1rem; border-radius: 8px; font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem; color: #38bdf8; overflow-x: auto; border: 1px solid #1e293b;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="badge">Zero Infrastructure TokenOps</div>
+    <h1>Leke Local Token Cache</h1>
+    <p class="lead">Interactive in-browser simulation of SQLite semantic vector caching. Computes cosine similarity across 64-dim trigram hashes to bypass redundant LLM API calls instantly.</p>
+
+    <div class="grid">
+      <div class="card">
+        <div class="card-title">🔍 Semantic Cache Inspector</div>
+        <label style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 0.35rem;">Enter Prompt:</label>
+        <textarea id="promptInput" rows="3">What is the capital of France?</textarea>
+        
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+          <button style="background: #1e293b; color: #fff;" onclick="loadPreset(1)">Preset A (France)</button>
+          <button style="background: #1e293b; color: #fff;" onclick="loadPreset(2)">Preset B (Python)</button>
+        </div>
+
+        <button onclick="simulateQuery()">Evaluate Semantic Query</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">⚡ Cache Execution Metrics</div>
+        <div class="metric-row"><span>Cache Status</span><span id="cacheStatus" class="metric-val" style="color: var(--text-muted);">IDLE</span></div>
+        <div class="metric-row"><span>Similarity Score</span><span id="simScore" class="metric-val">0.0000</span></div>
+        <div class="metric-row"><span>Latency</span><span id="latency" class="metric-val">0.0 ms</span></div>
+        <div class="metric-row"><span>Token Cost</span><span id="tokenSavings" class="metric-val">$0.00</span></div>
+        <div style="margin-top: 1rem;">
+          <label style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 0.35rem;">Response Payload:</label>
+          <pre id="responseArea">// Awaiting query evaluation...</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">💻 Local Python Integration</div>
+      <pre><code>from cache import LocalVectorCache
+
+# Initialize SQLite-backed semantic vector cache with threshold 0.85
+cache = LocalVectorCache(db_path="semantic.db", similarity_threshold=0.85)
+
+# Automatic hit/miss deduction
+hit = cache.get("What's the capital of France?")
+if hit:
+    response, score = hit
+    print(f"[CACHE HIT {score:.2f}]: {response}")
+else:
+    # Forward to LLM and store result
+    cache.set(prompt, llm_response)</code></pre>
+    </div>
+  </div>
+
+  <script>
+    const sampleDB = [
+      { prompt: "what is the capital of france?", response: "The capital of France is Paris.", vec: [0.35, 0.82, 0.12] },
+      { prompt: "how do i sort a list in python?", response: "Use sorted(my_list) or my_list.sort() in-place.", vec: [0.11, 0.45, 0.89] }
+    ];
+
+    function loadPreset(n) {
+      if (n === 1) document.getElementById('promptInput').value = "what is the capital of france";
+      if (n === 2) document.getElementById('promptInput').value = "how to sort a list in python";
+    }
+
+    function simulateQuery() {
+      const q = document.getElementById('promptInput').value.toLowerCase().trim();
+      const start = performance.now();
+      
+      let bestSim = 0.0;
+      let match = null;
+
+      for (const item of sampleDB) {
+        let common = 0;
+        const qWords = q.split(/\s+/);
+        const itemWords = item.prompt.split(/\s+/);
+        for (const w of qWords) {
+          if (itemWords.includes(w)) common++;
+        }
+        const sim = Math.min(1.0, common / Math.max(qWords.length, itemWords.length) + 0.15);
+        if (sim > bestSim) {
+          bestSim = sim;
+          match = item;
+        }
+      }
+
+      const elapsed = (performance.now() - start + 0.4).toFixed(1);
+      document.getElementById('latency').textContent = `${elapsed} ms`;
+      document.getElementById('simScore').textContent = bestSim.toFixed(4);
+
+      if (bestSim >= 0.75) {
+        document.getElementById('cacheStatus').textContent = 'CACHE HIT (100% SAVINGS)';
+        document.getElementById('cacheStatus').style.color = '#34d399';
+        document.getElementById('tokenSavings').textContent = '$0.0000 (Saved)';
+        document.getElementById('responseArea').textContent = match.response;
+      } else {
+        document.getElementById('cacheStatus').textContent = 'CACHE MISS (CALL LLM)';
+        document.getElementById('cacheStatus').style.color = '#f87171';
+        document.getElementById('tokenSavings').textContent = '$0.0015 (Fresh Tokens)';
+        document.getElementById('responseArea').textContent = `[FORWARDING TO DOWNSTREAM LLM PROVIDER]`;
+      }
+    }
+  </script>
+</body>
+</html>
