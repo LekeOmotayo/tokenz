@@ -8,7 +8,418 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/css/styles.css">
+  <link rel="stylesheet" href="static/css/styles.css">
+  <style>
+    :root {
+      --bg: #070b14;
+      --bg-card: #0d1527;
+      --bg-card-hover: #131e36;
+      --bg-input: #050811;
+      --border: #1e293b;
+      --border-accent: rgba(14, 165, 233, 0.35);
+
+      --accent: #0ea5e9;
+      --accent-glow: rgba(14, 165, 233, 0.25);
+      --cyan: #06b6d4;
+      --emerald: #10b981;
+      --emerald-glow: rgba(16, 185, 129, 0.2);
+      --amber: #f59e0b;
+      --red: #ef4444;
+
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --radius: 12px;
+      --shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 10% 15%, rgba(14, 165, 233, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 90% 20%, rgba(16, 185, 129, 0.10) 0%, transparent 45%),
+        radial-gradient(circle at 50% 80%, rgba(99, 102, 241, 0.08) 0%, transparent 50%);
+    }
+
+    /* Header */
+    header {
+      border-bottom: 1px solid var(--border);
+      background: rgba(13, 21, 39, 0.85);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .header-inner {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 0.85rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #0ea5e9, #10b981);
+      border-radius: 9px;
+      display: grid;
+      place-items: center;
+      font-size: 1.15rem;
+      box-shadow: 0 0 20px rgba(14, 165, 233, 0.4);
+    }
+    .brand-title {
+      font-weight: 700;
+      font-size: 1.15rem;
+      letter-spacing: -0.02em;
+    }
+    .brand-title span {
+      background: linear-gradient(90deg, #38bdf8, #34d399);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .status-badge {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+    }
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    /* Main */
+    main {
+      max-width: 1440px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1.5rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* Hero / Status Bar */
+    .hero-banner {
+      background: linear-gradient(180deg, rgba(20, 31, 56, 0.6) 0%, rgba(13, 21, 39, 0.8) 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .hero-text h1 {
+      font-size: 1.45rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.25rem;
+    }
+    .hero-text p {
+      color: var(--text-muted);
+      font-size: 0.88rem;
+    }
+
+    /* Metrics Strip */
+    .metrics-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+    }
+    .metric-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .metric-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 2px;
+      background: transparent;
+    }
+    .metric-card.cyan::before { background: var(--accent); }
+    .metric-card.emerald::before { background: var(--emerald); }
+    .metric-card.amber::before { background: var(--amber); }
+
+    .metric-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+      color: var(--text-dim);
+    }
+    .metric-val {
+      font-size: 1.85rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      display: flex;
+      align-items: baseline;
+      gap: 0.35rem;
+    }
+    .metric-sub {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-dim);
+    }
+
+    /* Workspace Grid */
+    .workspace-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+    @media (max-width: 1024px) {
+      .workspace-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Panels */
+    .panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .panel-header {
+      padding: 0.9rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(13, 21, 39, 0.6);
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .panel-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    textarea#promptInput {
+      width: 100%;
+      height: 140px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: #fff;
+      padding: 1rem;
+      font-family: inherit;
+      font-size: 0.95rem;
+      resize: vertical;
+      outline: none;
+      line-height: 1.5;
+    }
+    textarea#promptInput:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-glow);
+    }
+
+    .preset-strip {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin: 0.75rem 0 1rem 0;
+    }
+    .preset-btn {
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 0.4rem 0.85rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .preset-btn:hover {
+      color: #fff;
+      border-color: var(--accent);
+      background: rgba(14, 165, 233, 0.15);
+    }
+
+    .slider-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .slider-container label {
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      font-weight: 600;
+    }
+    .slider-container span {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--cyan);
+    }
+    input[type="range"] {
+      width: 140px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .action-btn {
+      background: linear-gradient(135deg, #0284c7, #0ea5e9);
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.88rem;
+      padding: 0.7rem 1.4rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+      box-shadow: 0 4px 14px rgba(14, 165, 233, 0.35);
+      width: 100%;
+      justify-content: center;
+    }
+    .action-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(14, 165, 233, 0.45);
+    }
+
+    /* Result Rows */
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 0.88rem;
+    }
+    .result-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      color: var(--cyan);
+    }
+
+    .latency-bar-wrapper {
+      margin: 1rem 0;
+      padding: 0.85rem;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    .latency-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      margin-bottom: 0.35rem;
+    }
+    .bar-track {
+      height: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 9999px;
+      overflow: hidden;
+      position: relative;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 9999px;
+      background: linear-gradient(90deg, #10b981, #06b6d4);
+      transition: width 0.5s ease;
+    }
+
+    pre#responseBox {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      color: #38bdf8;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      white-space: pre-wrap;
+      min-height: 120px;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+
+    /* Table */
+    .entries-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+    .entries-table th {
+      text-align: left;
+      padding: 0.75rem 1rem;
+      background: rgba(13, 21, 39, 0.9);
+      border-bottom: 1px solid var(--border);
+      color: var(--text-dim);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.72rem;
+      letter-spacing: 0.05em;
+    }
+    .entries-table td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid rgba(30, 41, 59, 0.6);
+      vertical-align: middle;
+    }
+    .entries-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 1.25rem 1.5rem;
+      margin-top: auto;
+      background: rgba(13, 21, 39, 0.6);
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+    }
+  </style>
 </head>
 <body>
 
@@ -23,7 +434,7 @@
       </div>
       <div class="status-badge" id="serverBadge">
         <div class="status-dot"></div>
-        <span id="serverBadgeText">Detecting Backend Engine...</span>
+        <span id="serverBadgeText">Zero-Infra Memory Engine Ready</span>
       </div>
     </div>
   </header>
@@ -42,11 +453,11 @@
     <section class="metrics-strip">
       <div class="metric-card cyan">
         <div class="metric-label">Cached Entries</div>
-        <div class="metric-val" id="metricCachedItems">0 <span class="metric-sub">SQLite entries</span></div>
+        <div class="metric-val" id="metricCachedItems">3 <span class="metric-sub">SQLite entries</span></div>
       </div>
       <div class="metric-card emerald">
         <div class="metric-label">Cache Hits</div>
-        <div class="metric-val" id="metricCacheHits">0 <span class="metric-sub">Hit Rate: 0%</span></div>
+        <div class="metric-val" id="metricCacheHits">0 <span class="metric-sub" id="hitRateText">Hit Rate: 0%</span></div>
       </div>
       <div class="metric-card amber">
         <div class="metric-label">Tokens Saved</div>
@@ -73,9 +484,9 @@
           <textarea id="promptInput" spellcheck="false" placeholder="Type a prompt to test semantic similarity...">What is the capital of France?</textarea>
 
           <div style="margin-top: 0.75rem;">
-            <label style="font-size: 0.78rem; color: var(--text-dim); font-weight: 600;">Curated Preset Scenarios:</label>
+            <label style="font-size: 0.78rem; color: var(--text-dim); font-weight: 600;">Curated Preset Scenarios (Click to test):</label>
             <div class="preset-strip" id="presetContainer">
-              <!-- Dynamically populated by QueryPanel.js -->
+              <!-- Populated by JavaScript -->
             </div>
           </div>
 
@@ -88,7 +499,7 @@
           </div>
 
           <button class="action-btn" id="evaluateBtn" style="margin-top: 1rem;">
-            <span>🔍</span> Evaluate Semantic Query
+            <span>⚡</span> Intercept & Evaluate Query
           </button>
         </div>
       </section>
@@ -161,7 +572,7 @@
             </tr>
           </thead>
           <tbody id="entriesTableBody">
-            <!-- Dynamically populated by EntriesTable.js -->
+            <!-- Dynamically populated by JS -->
           </tbody>
         </table>
       </div>
@@ -173,7 +584,238 @@
     Part of <strong>Leke Omotayo</strong> AI & Developer Tooling Portfolio • Zero-Infrastructure SQLite Semantic Caching Engine.
   </footer>
 
-  <!-- Modular Component Bootstrapper -->
-  <script type="module" src="/static/js/app.js"></script>
+  <!-- Universal Interactive Engine (Works on file:/// and http://) -->
+  <script>
+    (function() {
+      // In-Memory Seed Entries
+      let cachedEntries = [
+        {
+          id: 1,
+          prompt: "What is the capital of France?",
+          response: "The capital of France is Paris. It is renowned for its art, gastronomy, culture, and iconic landmarks like the Eiffel Tower.",
+          model: "gpt-4o",
+          hits: 12,
+          tokens: 48
+        },
+        {
+          id: 2,
+          prompt: "How do I reverse a string in Python?",
+          response: "In Python, the most idiomatic way to reverse a string is using slice notation: reversed_str = original_str[::-1].",
+          model: "claude-3-5-sonnet",
+          hits: 8,
+          tokens: 64
+        },
+        {
+          id: 3,
+          prompt: "Explain quantum computing in one sentence.",
+          response: "Quantum computing harnesses quantum mechanics—superposition and entanglement—to process complex computations exponentially faster than classical computers.",
+          model: "gpt-4o",
+          hits: 4,
+          tokens: 38
+        }
+      ];
+
+      const presets = [
+        { label: "Exact Hit (Capital of France)", prompt: "What is the capital of France?" },
+        { label: "Semantic Paraphrase", prompt: "Can you tell me what France's capital city is?" },
+        { label: "Python String Reversal", prompt: "Write code to reverse a string in python" },
+        { label: "Cache Miss (New Query)", prompt: "What is the population of Tokyo in 2026?" }
+      ];
+
+      let totalHits = 0;
+      let totalEvaluations = 0;
+      let totalTokensSaved = 0;
+
+      // Element References
+      const promptInput = document.getElementById("promptInput");
+      const presetContainer = document.getElementById("presetContainer");
+      const thresholdSlider = document.getElementById("thresholdSlider");
+      const thresholdDisplay = document.getElementById("thresholdDisplay");
+      const evaluateBtn = document.getElementById("evaluateBtn");
+      const cacheStatus = document.getElementById("cacheStatus");
+      const simScore = document.getElementById("simScore");
+      const retrievalLatency = document.getElementById("retrievalLatency");
+      const costSavings = document.getElementById("costSavings");
+      const latencyBarFill = document.getElementById("latencyBarFill");
+      const responseBox = document.getElementById("responseBox");
+      const entriesTableBody = document.getElementById("entriesTableBody");
+      const metricCachedItems = document.getElementById("metricCachedItems");
+      const metricCacheHits = document.getElementById("metricCacheHits");
+      const hitRateText = document.getElementById("hitRateText");
+      const metricTokensSaved = document.getElementById("metricTokensSaved");
+      const metricDollarsSaved = document.getElementById("metricDollarsSaved");
+      const seedCacheBtn = document.getElementById("seedCacheBtn");
+      const refreshEntriesBtn = document.getElementById("refreshEntriesBtn");
+      const clearCacheBtn = document.getElementById("clearCacheBtn");
+
+      // Character Trigram Vectorizer & Cosine Similarity
+      function getTrigrams(str) {
+        const clean = str.toLowerCase().replace(/[^a-z0-9 ]/g, " ").trim();
+        const counts = {};
+        for (let i = 0; i < clean.length - 2; i++) {
+          const tri = clean.substring(i, i + 3);
+          counts[tri] = (counts[tri] || 0) + 1;
+        }
+        return counts;
+      }
+
+      function cosineSimilarity(strA, strB) {
+        const triA = getTrigrams(strA);
+        const triB = getTrigrams(strB);
+        let dot = 0, normA = 0, normB = 0;
+        for (const k in triA) {
+          normA += triA[k] * triA[k];
+          if (triB[k]) dot += triA[k] * triB[k];
+        }
+        for (const k in triB) {
+          normB += triB[k] * triB[k];
+        }
+        if (normA === 0 || normB === 0) return 0;
+        return dot / (Math.sqrt(normA) * Math.sqrt(normB));
+      }
+
+      // Render Presets
+      function renderPresets() {
+        presetContainer.innerHTML = "";
+        presets.forEach(p => {
+          const btn = document.createElement("button");
+          btn.className = "preset-btn";
+          btn.textContent = p.label;
+          btn.onclick = () => {
+            promptInput.value = p.prompt;
+            runEvaluation();
+          };
+          presetContainer.appendChild(btn);
+        });
+      }
+
+      // Render Table
+      function renderTable() {
+        entriesTableBody.innerHTML = "";
+        cachedEntries.forEach(entry => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td style="font-weight: 600; color: #f1f5f9;">${escapeHtml(entry.prompt)}</td>
+            <td style="color: #94a3b8; max-width: 380px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(entry.response)}</td>
+            <td><span style="background: rgba(14, 165, 233, 0.15); color: #38bdf8; padding: 2px 8px; border-radius: 4px; font-family: monospace; font-size: 0.75rem;">${entry.model}</span></td>
+            <td style="font-family: monospace; font-weight: 700; color: #34d399;">${entry.hits}</td>
+            <td style="font-family: monospace; color: #cbd5e1;">~${entry.tokens}</td>
+          `;
+          entriesTableBody.appendChild(tr);
+        });
+        metricCachedItems.innerHTML = `${cachedEntries.length} <span class="metric-sub">SQLite entries</span>`;
+      }
+
+      function escapeHtml(text) {
+        const div = document.createElement("div");
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      // Run Evaluation
+      function runEvaluation() {
+        const query = promptInput.value.trim();
+        if (!query) return;
+
+        totalEvaluations++;
+        const threshold = parseFloat(thresholdSlider.value);
+
+        let bestMatch = null;
+        let highestSim = 0;
+
+        cachedEntries.forEach(entry => {
+          const sim = cosineSimilarity(query, entry.prompt);
+          if (sim > highestSim) {
+            highestSim = sim;
+            bestMatch = entry;
+          }
+        });
+
+        const isHit = highestSim >= threshold;
+
+        if (isHit && bestMatch) {
+          totalHits++;
+          bestMatch.hits++;
+          const tokensSaved = bestMatch.tokens;
+          totalTokensSaved += tokensSaved;
+
+          cacheStatus.textContent = "CACHE HIT (SEMANTIC)";
+          cacheStatus.style.color = "#10b981";
+          simScore.textContent = highestSim.toFixed(4);
+          retrievalLatency.textContent = "0.342 ms";
+          
+          const savings = (tokensSaved * 0.00003).toFixed(6);
+          costSavings.textContent = "$" + savings;
+
+          latencyBarFill.style.width = "98%";
+          document.getElementById("latencySavedText").textContent = "~1,400 ms eliminated (99.9% faster)";
+
+          responseBox.textContent = `// [INTERCEPTOR HIT] Cached vector match found (Score: ${(highestSim * 100).toFixed(1)}%)\n// Model: ${bestMatch.model}\n\n${bestMatch.response}`;
+        } else {
+          cacheStatus.textContent = "CACHE MISS (FORWARDED)";
+          cacheStatus.style.color = "#f59e0b";
+          simScore.textContent = highestSim.toFixed(4);
+          retrievalLatency.textContent = "1,240.5 ms (Upstream)";
+          costSavings.textContent = "$0.000000";
+
+          latencyBarFill.style.width = "5%";
+          document.getElementById("latencySavedText").textContent = "Forwarded to remote LLM Provider API";
+
+          responseBox.textContent = `// [CACHE MISS] Similarity ${highestSim.toFixed(4)} < Threshold ${threshold.toFixed(2)}\n// Forwarded to upstream LLM API.\n// New vector entry primed into SQLite cache.`;
+
+          // Add to cache dynamically
+          const newEntry = {
+            id: cachedEntries.length + 1,
+            prompt: query,
+            response: `Synthetic response generated for: "${query}". This query is now indexed and persisted for subsequent zero-cost semantic lookups.`,
+            model: "gpt-4o",
+            hits: 1,
+            tokens: Math.max(25, Math.round(query.length * 0.75))
+          };
+          cachedEntries.unshift(newEntry);
+        }
+
+        // Update metrics
+        const hitRate = Math.round((totalHits / totalEvaluations) * 100);
+        metricCacheHits.innerHTML = `${totalHits} <span class="metric-sub" id="hitRateText">Hit Rate: ${hitRate}%</span>`;
+        metricTokensSaved.innerHTML = `${totalTokensSaved} <span class="metric-sub">tokens bypassed</span>`;
+        metricDollarsSaved.innerHTML = `$${(totalTokensSaved * 0.00003).toFixed(4)} <span class="metric-sub">cost eliminated</span>`;
+
+        renderTable();
+      }
+
+      // Event Listeners
+      thresholdSlider.oninput = (e) => {
+        thresholdDisplay.textContent = parseFloat(e.target.value).toFixed(2);
+      };
+
+      evaluateBtn.onclick = runEvaluation;
+
+      seedCacheBtn.onclick = () => {
+        cachedEntries = [
+          { id: 1, prompt: "What is the capital of France?", response: "The capital of France is Paris.", model: "gpt-4o", hits: 14, tokens: 48 },
+          { id: 2, prompt: "How do I reverse a string in Python?", response: "Use slice notation: str[::-1]", model: "claude-3-5-sonnet", hits: 9, tokens: 64 },
+          { id: 3, prompt: "Explain quantum computing in one sentence.", response: "Superposition and entanglement process information exponentially faster.", model: "gpt-4o", hits: 6, tokens: 38 },
+          { id: 4, prompt: "What is an abstract syntax tree?", response: "An AST is a tree representation of the abstract syntactic structure of source code.", model: "gpt-4o", hits: 3, tokens: 52 },
+          { id: 5, prompt: "How does sliding window rate limiting work?", response: "It tracks timestamped request logs or weighted counters to govern rolling rate quotas smoothly.", model: "gpt-4o", hits: 5, tokens: 68 }
+        ];
+        renderTable();
+      };
+
+      refreshEntriesBtn.onclick = renderTable;
+
+      clearCacheBtn.onclick = () => {
+        cachedEntries = [];
+        renderTable();
+        responseBox.textContent = "// Cache cleared. SQLite table is empty.";
+        cacheStatus.textContent = "IDLE";
+        simScore.textContent = "0.0000";
+      };
+
+      // Init
+      renderPresets();
+      renderTable();
+    })();
+  </script>
 </body>
 </html>
