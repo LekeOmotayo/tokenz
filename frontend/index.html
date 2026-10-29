@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Semantic Token Cache & TokenOps Accelerator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+        </svg>
+      </div>
+      <div>
+        <h1 class="brand-title">LOCAL TOKEN CACHE</h1>
+        <p class="brand-subtitle">Deterministic Vector Embeddings & TokenOps ROI Accelerator</p>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="status-indicator"><span class="pulse"></span> VECTOR DB ONLINE</div>
+      <div class="port-tag">PORT 8098</div>
+      <button id="clear-cache-btn" class="btn btn-outline">Clear SQLite Store</button>
+    </div>
+  </header>
+
+  <!-- TokenOps ROI Banner -->
+  <section class="roi-strip">
+    <div class="roi-card">
+      <span class="roi-label">CUMULATIVE DOLLARS SAVED</span>
+      <span id="roi-dollars" class="roi-val text-mint">$0.000000</span>
+    </div>
+    <div class="roi-card">
+      <span class="roi-label">TOKENS ELIMINATED</span>
+      <span id="roi-tokens" class="roi-val">0</span>
+    </div>
+    <div class="roi-card">
+      <span class="roi-label">UPSTREAM LATENCY SAVED</span>
+      <span id="roi-latency" class="roi-val">0.0s</span>
+    </div>
+    <div class="roi-card">
+      <span class="roi-label">CACHE HIT RATIO</span>
+      <span id="roi-ratio" class="roi-val">0.0%</span>
+    </div>
+  </section>
+
+  <main class="main-layout">
+    <!-- Prompt & Query Panel -->
+    <section class="panel query-panel">
+      <div class="panel-header">
+        <h2>Semantic Query Console</h2>
+        <span class="panel-sub">Evaluate cosine similarity against cached vectors</span>
+      </div>
+
+      <div class="sample-pills">
+        <span class="pill-label">Try Query:</span>
+        <button class="sample-pill" data-prompt="What is the capital of France?">"What is the capital of France?"</button>
+        <button class="sample-pill" data-prompt="tell me the capital city of France">"tell me the capital city of France" (Variation)</button>
+        <button class="sample-pill" data-prompt="How do I reverse a string in Python?">"How do I reverse a string in Python?"</button>
+      </div>
+
+      <div class="form-group">
+        <label for="prompt-input">Prompt / Query Text</label>
+        <textarea id="prompt-input" class="prompt-textarea" rows="4" placeholder="Enter prompt to query or seed semantic cache..."></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group flex-1">
+          <label for="model-select">Target Model Pricing</label>
+          <select id="model-select" class="form-select">
+            <option value="gpt-4o">OpenAI GPT-4o ($2.50 / $10.00)</option>
+            <option value="claude-3-5-sonnet">Anthropic Claude 3.5 Sonnet ($3.00 / $15.00)</option>
+            <option value="gpt-4o-mini">OpenAI GPT-4o-mini ($0.15 / $0.60)</option>
+            <option value="llama-3-70b">Meta Llama 3 70B ($0.90 / $0.90)</option>
+          </select>
+        </div>
+
+        <div class="form-group flex-1">
+          <div class="slider-header">
+            <label for="similarity-slider">Cosine Threshold</label>
+            <span id="threshold-val" class="threshold-display">0.85</span>
+          </div>
+          <input type="range" id="similarity-slider" min="0.70" max="0.99" step="0.01" value="0.85" class="form-range">
+        </div>
+      </div>
+
+      <button id="query-btn" class="btn btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        Execute Semantic Lookup
+      </button>
+    </section>
+
+    <!-- Result & Telemetry Panel -->
+    <section class="panel result-panel">
+      <div class="panel-header">
+        <h2>Cache Decision & Vector Match</h2>
+        <span id="decision-badge" class="decision-pill status-ready">READY</span>
+      </div>
+
+      <div class="telemetry-grid">
+        <div class="telemetry-item">
+          <span class="telemetry-label">COSINE SIMILARITY</span>
+          <span id="telemetry-similarity" class="telemetry-value">0.0000</span>
+        </div>
+        <div class="telemetry-item">
+          <span class="telemetry-label">RETRIEVAL LATENCY</span>
+          <span id="telemetry-latency" class="telemetry-value">-- ms</span>
+        </div>
+        <div class="telemetry-item">
+          <span class="telemetry-label">TOKENS PRESERVED</span>
+          <span id="telemetry-tokens" class="telemetry-value">0</span>
+        </div>
+        <div class="telemetry-item">
+          <span class="telemetry-label">ESTIMATED COST SAVED</span>
+          <span id="telemetry-cost" class="telemetry-value text-mint">$0.000000</span>
+        </div>
+      </div>
+
+      <div class="response-container">
+        <div class="response-header">
+          <span>Cached or Returned Payload</span>
+          <span class="mono-label" id="model-tag">gpt-4o</span>
+        </div>
+        <div class="response-body" id="response-body">
+          Run a query to evaluate semantic cache performance.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

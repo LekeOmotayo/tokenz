@@ -5,7 +5,7 @@ LRU eviction, and exact match shortcuts using pure Python standard library.
 """
 
 import unittest
-from cache import LocalVectorCache
+from backend.core.cache import LocalVectorCache
 
 
 class TestLocalVectorCache(unittest.TestCase):
@@ -105,3 +105,4 @@ class TestLocalVectorCache(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
